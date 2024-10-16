@@ -7,6 +7,10 @@ if [ "$(whoami)" != "root" ]; then
     exit 1
 fi
 
+cp /etc/localtime ${OUTPUT_DIR}/etc/localtime
+cp /etc/resolv.conf ${OUTPUT_DIR}/etc/resolv.conf
+
+
 pkg -c ${OUTPUT_DIR} install ${PKGS}
 mkdir ${OUTPUT_DIR}/webpage
 cp ${SCRIPT_PATH}/conf/usr/local/etc/lighttpd/lighttpd.conf ${OUTPUT_DIR}/usr/local/etc/lighttpd/lighttpd.conf
