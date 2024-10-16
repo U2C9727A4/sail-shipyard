@@ -4,7 +4,7 @@ OUTPUT_DIR=$(realpath ${1%/})
 
 if [ "$(whoami)" != "root" ]; then
     echo "This script needs root permissions."
-    exit
+    exit 1
 fi
 
 pkg -c ${OUTPUT_DIR} install ${PKGS}
