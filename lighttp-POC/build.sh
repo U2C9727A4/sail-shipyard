@@ -1,3 +1,5 @@
+#!/bin/sh
+
 PKGS="lighttpd"
 SCRIPT_PATH=$(echo $(dirname $(realpath "$0")))
 OUTPUT_DIR=$(realpath ${1%/})
