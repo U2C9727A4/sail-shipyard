@@ -1,0 +1,12 @@
+[jailfox_rules=8185]
+add include $devfsrules_hide_all
+add include $devfsrules_unhide_basic
+add include $devfsrules_unhide_login
+
+# GPU stuff
+add path 'nvidia*' unhide
+add path 'dri/*' unhide
+
+# Sound stuff
+add path 'mixer*' unhide
+add path 'dsp*' unhide
