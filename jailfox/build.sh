@@ -15,11 +15,14 @@ alias chexec="chroot ${OUTPUT_DIR}/"
 
 if [ "$(whoami)" != "root" ]; then
     echo "This script needs root permissions."
-    exit
+    exit 1
 fi
 
 echo "The host requires the package `xhost`. Installing it."
 pkg install xhost
+
+cp /etc/localtime ${OUTPUT_DIR}/etc/localtime
+cp /etc/resolv.conf ${OUTPUT_DIR}/etc/resolv.conf
 
 pkg -c ${OUTPUT_DIR} install ${PKGS}
 mkdir -p ${OUTPUT_DIR}/tmp/.X11-unix
