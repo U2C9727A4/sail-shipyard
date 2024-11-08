@@ -5,14 +5,17 @@ SCRIPT_PATH=$(echo $(dirname $(realpath "$0")))
 OUTPUT_DIR=$(realpath ${1%/})
 FILES="index.html lighttpd.conf httpBoat.conf"
 
-# alias to check if the specified field exists in file.
+# function to check if the specified field exists in file.
 # $1 = field
 # $2 = file
-alias chkfield="cat $2 | grep $1"
-
-# alias to check if file exists in SCRIPT_PATH.
-alias chkfile="find ${SCRIPT_PATH} -name '${1}'"
-
+# NOTE the sed part removes stuff that is commented out.
+chkfield() {
+    cat $2 | sed -E 's/#.*//g' | grep "$1"
+}
+# function to check if file exists in SCRIPT_PATH.
+chkfile() {
+    find ${SCRIPT_PATH} -name "$1"
+}
 # root permission check
 if [ "$(whoami)" != "root" ]; then
     echo "This script needs root permissions."
@@ -46,14 +49,17 @@ cp /etc/resolv.conf ${OUTPUT_DIR}/etc/resolv.conf
 
 # Package installation check, retry 3 times before exiting.
 PKG_RETRIES=0
-while true do;
+while :
+do
     pkg -c ${OUTPUT_DIR} install ${PKGS}
     # Package installation check
     if [ $? != 0 ]; then
         echo "Package installation failed."
         echo "Trying again..."
+    else
+        break
     fi
-    if [ $PKG_RETRIES > 3 ]; then 
+    if [ $PKG_RETRIES -gt 3 ]; then 
         echo "Maximum retry reached. Cannot continue."
         exit 1
     fi
@@ -65,5 +71,17 @@ mkdir ${OUTPUT_DIR}/webpage
 cp ${SCRIPT_PATH}/conf/usr/local/etc/lighttpd/lighttpd.conf ${OUTPUT_DIR}/usr/local/etc/lighttpd/lighttpd.conf
 cp ${SCRIPT_PATH}/conf/webpage/index.html ${OUTPUT_DIR}/webpage/index.html
 
+
+# Since this script only adds the path field, we only have to check for that and the closing brace.
+
+if chkfield "path" "${SCRIPT_PATH}/host-conf/jailfox.conf" >/dev/null 2>&1; then
+    echo "path already exists in jailfox.conf. Please re-clone this boat."
+    exit 1
+fi
+BRACES=$(chkfield "}" "${SCRIPT_PATH}/host-conf/jailfox.conf" | sed 's/{[^{}]*}//g') # the sed here is for clearing out paired braces.
+if [ -z $BRACES ]; then
+    echo "Closing brace already exists in jailfox.conf. Please re-clone this boat."
+    exit 1
+fi
 
 printf "\tpath = '${OUTPUT_DIR}';\n}" >> ${SCRIPT_PATH}/host-conf/httpBoat.conf
