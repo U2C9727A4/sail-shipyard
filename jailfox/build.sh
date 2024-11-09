@@ -12,6 +12,7 @@ PKGS="firefox liberation-fonts-ttf mesa-dri egl"
 SCRIPT_PATH=$(echo $(dirname $(realpath "$0")))
 OUTPUT_DIR=$(realpath ${1%/})
 HOST_PKGS="xhost"
+FILES="devfs_rules jailfox.conf"
 
 # function to check if the specified field exists in file.
 # $1 = field
@@ -38,6 +39,22 @@ if [ ! -w "${OUTPUT_DIR}" ]; then
     echo "No write permission to output directory. Cannot continue."
     exit 1
 fi
+
+# File existence check
+FILE_AMOUNT=$(expr $(echo ${FILES} | wc -w) + 1) # Increment by one because non-zero indexing.
+FILES_CHECKED=1 # Start with 1 because non-zero indexing.
+set -- $FILES
+
+while [ "$FILES_CHECKED" -le "$FILE_AMOUNT" ]; do
+    FILE_TO_CHECK=$(eval echo \${$FILES_CHECKED})
+    
+    if [ -z "$(chkfile "$FILE_TO_CHECK")" ]; then
+        echo "A file does not exist. Cannot continue."
+        exit 1
+    fi
+
+    FILES_CHECKED=$((FILES_CHECKED + 1))
+done
 
 echo "The host requires the package(s) \"${HOST_PKGS}\". Installing it."
 
